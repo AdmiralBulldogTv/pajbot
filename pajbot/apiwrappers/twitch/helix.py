@@ -319,8 +319,10 @@ class TwitchHelixAPI(BaseTwitchAPI):
 
         switcher = {"3000": 3, "2000": 2, "1000": 1}
         subscribers = {entry["user_id"]: switcher[entry["tier"]] for entry in response["data"]}
-        pagination_cursor = response["pagination"]["cursor"]
-
+        if "cursor" in response["pagination"]:
+            pagination_cursor = response["pagination"]["cursor"]
+        else:
+            pagination_cursor = None
         return subscribers, pagination_cursor
 
     def fetch_all_subscribers(self, broadcaster_id, authorization):

@@ -45,11 +45,11 @@ class WebSocketServer:
                             self.sendClose()
                             return
                         switcher = {"auth": self._auth, "next_song": self._next_song, "ready": self._ready}
-                        if (
-                            not ("event" in message
+                        if not (
+                            "event" in message
                             and "data" in message
                             and message["event"] in switcher
-                            and switcher[message["event"]](db_session, message["data"]))
+                            and switcher[message["event"]](db_session, message["data"])
                         ):
                             self.sendClose()
 

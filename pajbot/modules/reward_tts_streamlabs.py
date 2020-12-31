@@ -128,7 +128,11 @@ class RewardTTSModuleStreamLabs(BaseModule):
         return False
 
     def on_message(self, source, message, event, **rest):
-        if (not self.settings["redeemed_id"] and not self.isHighlightedMessage(event)) or (self.settings["redeemed_id"] and self.isReward(event) != self.settings["redeemed_id"]) or (self.settings["sub_only"] and not source.subscriber):
+        if (
+            (not self.settings["redeemed_id"] and not self.isHighlightedMessage(event))
+            or (self.settings["redeemed_id"] and self.isReward(event) != self.settings["redeemed_id"])
+            or (self.settings["sub_only"] and not source.subscriber)
+        ):
             return
 
         thread = threading.Thread(target=self.threaded_delay, args=(source, message), daemon=True)

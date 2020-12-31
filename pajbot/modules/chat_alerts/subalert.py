@@ -313,7 +313,6 @@ class SubAlertModule(BaseModule):
         else:
             log.debug(f"Unhandled msg-id: {tags['msg-id']} - tags: {tags}")
 
-
     def on_cheer(self, user, bits_cheered, **rest):
         if self.settings["grant_points_on_bits"] <= 0:
             return
@@ -329,12 +328,13 @@ class SubAlertModule(BaseModule):
         points_to_give = int(amount * self.settings["grant_points_on_donate"])
         user.points += points_to_give
         self.bot.whisper(user, f"You have been given {points_to_give} points for donating ${amount:.2f}")
+
     def enable(self, bot):
         HandlerManager.add_handler("on_usernotice", self.on_usernotice)
-        #HandlerManager.add_handler("on_usernotice", self.on_usernotice)
+        # HandlerManager.add_handler("on_usernotice", self.on_usernotice)
         HandlerManager.add_handler("on_donate", self.on_donate)
 
     def disable(self, bot):
         HandlerManager.remove_handler("on_usernotice", self.on_usernotice)
-        #HandlerManager.remove_handler("on_usernotice", self.on_usernotice)
+        # HandlerManager.remove_handler("on_usernotice", self.on_usernotice)
         HandlerManager.remove_handler("on_donate", self.on_donate)

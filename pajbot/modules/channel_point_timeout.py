@@ -33,8 +33,16 @@ class ChannelPointTimeout(BaseModule):
             default="",
             constraints={"min_str_len": 36, "max_str_len": 36},
         ),
-        ModuleSetting(key="timeout_duration", label="Duration in seconds for the timeout", type="number", required=True, default=3600),
-        ModuleSetting(key="vip_immune", label="Are vips immune to timeouts?", type="boolean", required=True, default=True),
+        ModuleSetting(
+            key="timeout_duration",
+            label="Duration in seconds for the timeout",
+            type="number",
+            required=True,
+            default=3600,
+        ),
+        ModuleSetting(
+            key="vip_immune", label="Are vips immune to timeouts?", type="boolean", required=True, default=True
+        ),
     ]
 
     def __init__(self, bot):

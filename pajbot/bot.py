@@ -825,7 +825,7 @@ class Bot:
 
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             source = User.from_basics(db_session, UserBasics(id, login, name))
-            if source.timed_out: # they cant type if they are timedout
+            if source.timed_out:  # they cant type if they are timedout
                 source.timed_out = False
 
             res = HandlerManager.trigger("on_pubmsg", source=source, message=event.arguments[0])

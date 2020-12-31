@@ -396,10 +396,10 @@ let queue = [];
 var playing = false;
 function play_sound({ link, volume, use_queue }) {
     if (use_queue && playing) {
-        console.log("Queued");
-        queue.push({link, volume, use_queue}); 
+        console.log('Queued');
+        queue.push({ link, volume, use_queue });
         return;
-    } 
+    }
     if (use_queue) {
         playing = true;
     }
@@ -528,8 +528,8 @@ function handleWebsocketData(json_data) {
                     '</span> EleGiggle',
             });
             // setTimeout(function() {
-                // TODO idk kev maybe this will just stay removed with new playsounds system
-                //play_sound('slap');
+            // TODO idk kev maybe this will just stay removed with new playsounds system
+            //play_sound('slap');
             // }, 100);
             break;
         case 'play_sound':

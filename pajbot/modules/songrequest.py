@@ -195,7 +195,10 @@ class SongrequestModule(BaseModule):
 
         self.bot.say(
             self.settings["message_in_chat"].format(
-                user=source, title=requested_song.song_info.title, playing_in=playing_in, current_pos=current_pos,
+                user=source,
+                title=requested_song.song_info.title,
+                playing_in=playing_in,
+                current_pos=current_pos,
             )
         )
         return True

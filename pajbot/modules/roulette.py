@@ -159,7 +159,10 @@ class RouletteModule(BaseModule):
                 CommandExample(
                     None,
                     "Roulette for 69 points",
-                    chat="user:!"+ self.settings["command_name"].split("|")[0].lower().replace("!", "").replace(" ", "") + " 69\n" "bot:troydota won 69 points in roulette! FeelsGoodMan",
+                    chat="user:!"
+                    + self.settings["command_name"].split("|")[0].lower().replace("!", "").replace(" ", "")
+                    + " 69\n"
+                    "bot:troydota won 69 points in roulette! FeelsGoodMan",
                     description="Do a roulette for 69 points",
                 ).parse()
             ],
@@ -180,7 +183,9 @@ class RouletteModule(BaseModule):
         if message is None:
             bot.whisper(
                 source,
-                "I didn't recognize your bet! Usage: !" + self.settings["command_name"].split("|")[0].lower().replace("!", "").replace(" ", "") + " 150 to bet 150 points",
+                "I didn't recognize your bet! Usage: !"
+                + self.settings["command_name"].split("|")[0].lower().replace("!", "").replace(" ", "")
+                + " 150 to bet 150 points",
             )
             return False
 

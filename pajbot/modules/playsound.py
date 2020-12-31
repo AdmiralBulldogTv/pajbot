@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 WIDGET_ID = 3
 
+
 class PlaysoundModule(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "Playsound"
@@ -112,7 +113,9 @@ class PlaysoundModule(BaseModule):
             default="",
         ),
         ModuleSetting(key="use_queue", label="Queue playsounds", type="boolean", required=True, default=True),
-        ModuleSetting(key="disable_command", label="Disable the playsound command", type="boolean", required=True, default=False),
+        ModuleSetting(
+            key="disable_command", label="Disable the playsound command", type="boolean", required=True, default=False
+        ),
     ]
 
     def __init__(self, bot):

@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 WIDGET_ID = 1
 
+
 class ShowEmoteModule(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "Show Emote"
