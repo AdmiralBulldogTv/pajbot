@@ -1,3 +1,5 @@
+from typing import Any, List, Callable
+
 import cgi
 import datetime
 import logging
@@ -44,7 +46,7 @@ from pajbot.managers.songrequest_queue_manager import SongRequestQueueManager
 from pajbot.migration.db import DatabaseMigratable
 from pajbot.migration.migrate import Migration
 from pajbot.migration.redis import RedisMigratable
-from pajbot.models.action import ActionParser
+from pajbot.models.action import ActionParser, SubstitutionFilter
 from pajbot.models.banphrase import BanphraseManager
 from pajbot.models.module import ModuleManager
 from pajbot.models.sock import SocketManager
@@ -56,11 +58,6 @@ from pajbot.tmi import TMIRateLimits, WhisperOutputMode
 from pajbot import utils
 
 log = logging.getLogger(__name__)
-
-URL_REGEX = re.compile(
-    r"\(?(?:(http|https):\/\/)?(?:((?:[^\W\s]|\.|-|[:]{1})+)@{1})?((?:www.)?(?:[^\W\s]|\.|-)+[\.][^\W\s]{2,4}|localhost(?=\/)|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::(\d*))?([\/]?[^\s\?]*[\/]{1})*(?:\/?([^\s\n\?\[\]\{\}\#]*(?:(?=\.)){1}|[^\s\n\?\[\]\{\}\.\#]*)?([\.]{1}[^\s\?\#]*)?)?(?:\?{1}([^\s\n\#\[\]]*))?([\#][^\s\n]*)?\)?",
-    re.IGNORECASE,
-)
 
 SLICE_REGEX = re.compile(r"(-?\d+)?(:?(-?\d+)?)?")
 
@@ -116,11 +113,11 @@ class Bot:
 
         # streamer
         if "streamer" in config["main"]:
-            self.streamer = config["main"]["streamer"]
+            self.streamer: str = config["main"]["streamer"]
             self.channel = "#" + self.streamer
         elif "target" in config["main"]:
             self.channel = config["main"]["target"]
-            self.streamer = self.channel[1:]
+            self.streamer: str = self.channel[1:]
 
         self.bot_domain = self.config["web"]["domain"]
         self.streamer_display = self.config["web"]["streamer_name"]
@@ -425,6 +422,37 @@ class Bot:
 
         return None
 
+    def get_date_value(self, key, extra={}):
+        try:
+            tz = timezone(key)
+            return datetime.datetime.now(tz).strftime("%Y-%m-%d")
+        except:
+            log.exception("Unhandled exception in get_date_value")
+
+    def get_datetimefromisoformat_value(self, key, extra={}):
+        try:
+            dt = datetime.datetime.fromisoformat(key)
+            if dt.tzinfo is None:
+                # The date format passed through in key did not contain a timezone, so we replace it with UTC
+                dt = dt.replace(tzinfo=datetime.timezone.utc)
+
+            return dt
+        except:
+            log.exception("Unhandled exception in get_datetimefromisoformat_value")
+
+    def get_current_song_value(self, key, extra={}):
+        if self.stream_manager.online:
+            current_song = PleblistManager.get_current_song(self.stream_manager.current_stream.id)
+            inner_keys = key.split(".")
+            val = current_song
+            for inner_key in inner_keys:
+                val = getattr(val, inner_key, None)
+                if val is None:
+                    return None
+            if val is not None:
+                return val
+        return None
+
     def get_strictargs_value(self, key, extra={}):
         ret = self.get_args_value(key, extra)
 
@@ -549,6 +577,15 @@ class Bot:
         diff = now - molly_birth
         return diff.total_seconds() / 3600 / 24 / 365
 
+    def get_datetime_value(self, key, extra=[]):
+        try:
+            tz = timezone(key)
+            return datetime.datetime.now(tz)
+        except:
+            log.exception("Unhandled exception in get_datetime_value")
+
+        return None
+
     @property
     def is_online(self):
         return self.stream_manager.online
@@ -648,15 +685,6 @@ class Bot:
         else:
             log.warning("Unknown send_message method: %s", method)
 
-    def safe_privmsg(self, message, channel=None):
-        # Check for banphrases
-        res = self.banphrase_manager.check_message(message, None)
-        if res is not False:
-            self.privmsg(f"filtered message ({res.id})", channel)
-            return
-
-        self.privmsg(message, channel)
-
     def say(self, message, channel=None):
         if message is None:
             log.warning("message=None passed to Bot::say()")
@@ -669,11 +697,20 @@ class Bot:
         self.privmsg(message[:510], channel)
 
     def is_bad_message(self, message):
+        # Checks for banphrases
         return self.banphrase_manager.check_message(message, None) is not False
+
+    def safe_privmsg(self, message, channel=None):
+        if not self.is_bad_message(message):
+            self.privmsg(message, channel)
 
     def safe_me(self, message, channel=None):
         if not self.is_bad_message(message):
             self.me(message, channel)
+
+    def safe_say(self, message, channel=None):
+        if not self.is_bad_message(message):
+            self.say(message, channel)
 
     def me(self, message, channel=None):
         self.say("/me " + message[:500], channel=channel)
@@ -825,10 +862,12 @@ class Bot:
 
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             source = User.from_basics(db_session, UserBasics(id, login, name))
+
             if source.timed_out:  # they cant type if they are timedout
                 source.timed_out = False
 
-            res = HandlerManager.trigger("on_pubmsg", source=source, message=event.arguments[0])
+            res = HandlerManager.trigger("on_pubmsg", source=source, message=event.arguments[0], tags=tags)
+
             if res is False:
                 return False
 
@@ -929,8 +968,8 @@ class Bot:
 
         sys.exit(0)
 
-    def apply_filter(self, resp, f):
-        available_filters = {
+    def apply_filter(self, resp, f: SubstitutionFilter) -> Any:
+        available_filters: dict[str, Callable[[Any, List[str]], Any]] = {
             "strftime": _filter_strftime,
             "timezone": _filter_timezone,
             "lower": lambda var, args: var.lower(),
@@ -943,6 +982,7 @@ class Bot:
             else utils.time_since(var * 60, 0, time_format="long"),
             "time_since": lambda var, args: "no time" if var == 0 else utils.time_since(var, 0, time_format="long"),
             "time_since_dt": _filter_time_since_dt,
+            "timedelta_days": _filter_timedelta_days,
             "urlencode": _filter_urlencode,
             "join": _filter_join,
             "number_format": _filter_number_format,
@@ -951,21 +991,26 @@ class Bot:
             "or_broadcaster": self._filter_or_broadcaster,
             "or_streamer": self._filter_or_broadcaster,
             "slice": _filter_slice,
+            "subtract": _filter_subtract,
+            "multiply": _filter_multiply,
+            "divide": _filter_divide,
+            "floor": _filter_floor,
+            "ceil": _filter_ceil,
         }
         if f.name in available_filters:
             return available_filters[f.name](resp, f.arguments)
         return resp
 
-    def _filter_or_broadcaster(self, var, args):
-        return _filter_or_else(var, self.streamer)
+    def _filter_or_broadcaster(self, var: Any, args: List[str]) -> Any:
+        return _filter_or_else(var, [self.streamer])
 
     def find_unique_urls(self, message):
         from pajbot.modules.linkchecker import find_unique_urls
 
-        return find_unique_urls(URL_REGEX, message)
+        return find_unique_urls(message)
 
 
-def _filter_time_since_dt(var, args):
+def _filter_time_since_dt(var: Any, args: List[str]) -> Any:
     try:
         ts = utils.time_since(utils.now().timestamp(), var.timestamp())
         if ts:
@@ -976,7 +1021,15 @@ def _filter_time_since_dt(var, args):
         return "never FeelsBadMan ?"
 
 
-def _filter_join(var, args):
+def _filter_timedelta_days(var: Any, args: List[str]) -> Any:
+    try:
+        td = utils.now() - var
+        return str(td.days)
+    except:
+        return "0"
+
+
+def _filter_join(var: Any, args: List[str]) -> Any:
     try:
         separator = args[0]
     except IndexError:
@@ -985,7 +1038,7 @@ def _filter_join(var, args):
     return separator.join(var.split(" "))
 
 
-def _filter_number_format(var, args):
+def _filter_number_format(var: Any, args: List[str]) -> Any:
     try:
         return f"{int(var):,d}"
     except:
@@ -993,15 +1046,15 @@ def _filter_number_format(var, args):
     return var
 
 
-def _filter_strftime(var, args):
+def _filter_strftime(var: Any, args: List[str]) -> Any:
     return var.strftime(args[0])
 
 
-def _filter_timezone(var, args):
+def _filter_timezone(var: Any, args: List[str]) -> Any:
     return var.astimezone(timezone(args[0]))
 
 
-def _filter_urlencode(var, args):
+def _filter_urlencode(var: Any, args: List[str]) -> Any:
     return urllib.parse.urlencode({"x": var})[2:]
 
 
@@ -1009,21 +1062,72 @@ def lowercase_first_letter(s):
     return s[:1].lower() + s[1:] if s else ""
 
 
-def _filter_add(var, args):
+def _filter_add(var: Any, args: List[str]) -> Any:
     try:
-        return str(int(var) + int(args[0]))
+        lh = utils.parse_number_from_string(var)
+        rh = utils.parse_number_from_string(args[0])
+
+        return str(lh + rh)
     except:
         return ""
 
 
-def _filter_or_else(var, args):
+def _filter_subtract(var: Any, args: List[str]) -> Any:
+    try:
+        lh = utils.parse_number_from_string(var)
+        rh = utils.parse_number_from_string(args[0])
+
+        return str(lh - rh)
+    except:
+        return ""
+
+
+def _filter_multiply(var: Any, args: List[str]) -> Any:
+    try:
+        lh = utils.parse_number_from_string(var)
+        rh = utils.parse_number_from_string(args[0])
+
+        return str(lh * rh)
+    except:
+        return ""
+
+
+def _filter_divide(var: Any, args: List[str]) -> Any:
+    try:
+        lh = utils.parse_number_from_string(var)
+        rh = utils.parse_number_from_string(args[0])
+
+        return str(lh / rh)
+    except:
+        return ""
+
+
+def _filter_floor(var: Any, args: List[str]) -> Any:
+    import math
+
+    try:
+        return str(math.floor(float(var)))
+    except:
+        return ""
+
+
+def _filter_ceil(var: Any, args: List[str]) -> Any:
+    import math
+
+    try:
+        return str(math.ceil(float(var)))
+    except:
+        return ""
+
+
+def _filter_or_else(var: Any, args: List[str]) -> Any:
     if var is None or len(var) <= 0:
         return args[0]
     else:
         return var
 
 
-def _filter_slice(var, args):
+def _filter_slice(var: Any, args: List[str]) -> Any:
     m = SLICE_REGEX.match(args[0])
     if m:
         groups = m.groups()

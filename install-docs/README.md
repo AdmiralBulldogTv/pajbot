@@ -43,7 +43,7 @@ sudo apt update
 sudo apt install python3 python3-dev python3-pip python3-venv
 ```
 
-Now, double-check that you have Python 3.6 or newer installed:
+Now, double-check that you have Python 3.7 or newer installed:
 
 ```bash
 python3 --version
@@ -52,7 +52,7 @@ python3 --version
 We also need the following libraries and build tools:
 
 ```bash
-sudo apt install libssl-dev libpq-dev build-essential
+sudo apt install libssl-dev libpq-dev build-essential git
 ```
 
 ## Set up a system user
@@ -258,6 +258,8 @@ Congratulations! Your bot should be running by now, but there are some extra ste
   !add command playsounds --reply @$(source:name), available playsounds are listed here: https://$(tb:bot_domain)/playsounds
   !add command title --reply @$(source:name), Current stream title: $(stream:title)
   !add command game --reply @$(source:name), Current stream game: $(stream:game)
+  !add command timeonline|watchtime --reply @$(source:name), $(usersource;1:username_raw) has spent $(usersource;1:minutes_in_chat_online|time_since_minutes) in online chat.
+  !add command timeoffline --reply @$(source:name), $(usersource;1:username_raw) has spent $(usersource;1:minutes_in_chat_offline|time_since_minutes) in offline chat.
   ```
 
 - Advanced command arguments can be found [here.](https://github.com/pajbot/pajbot/blob/1ed503003c7363ebc592d0945d6c31ab1107db30/pajbot/managers/command.py#L450-L464)

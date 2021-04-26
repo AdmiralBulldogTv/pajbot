@@ -30,7 +30,7 @@ class UserRank(Base):
 
 
 class UserBasics:
-    def __init__(self, id, login, name):
+    def __init__(self, id: str, login: str, name: str):
         self.id = id
         self.login = login
         self.name = name
@@ -95,7 +95,7 @@ class User(Base):
     tier = Column(INT, nullable=True)
     num_paid_timeouts = Column(BIGINT, nullable=False, server_default="0", index=True)
 
-    _rank = relationship("UserRank", primaryjoin=foreign(id) == UserRank.user_id, lazy="select")
+    _rank = relationship("UserRank", primaryjoin=foreign(id) == UserRank.user_id, lazy="select", viewonly=True)
 
     def __init__(self, *args, **kwargs):
         self.level = 100

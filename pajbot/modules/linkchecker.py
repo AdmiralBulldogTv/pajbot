@@ -6,6 +6,7 @@ from datetime import timedelta
 import requests
 from bs4 import BeautifulSoup
 from sqlalchemy import Column, INT, TEXT
+from urlextract import URLExtract
 
 import pajbot.managers
 import pajbot.models
@@ -22,6 +23,10 @@ from pajbot.modules import ModuleSetting
 from pajbot.models.user import User
 
 log = logging.getLogger(__name__)
+
+
+extractor = URLExtract()
+extractor.update_when_older(14)
 
 
 def is_subdomain(x, y):
@@ -63,11 +68,9 @@ def is_same_url(x, y):
     )
 
 
-def find_unique_urls(regex, message):
-    _urls = regex.finditer(message)
+def find_unique_urls(message):
     urls = []
-    for i in _urls:
-        url = i.group(0)
+    for url in extractor.gen_urls(message):
         if not (url.startswith("http://") or url.startswith("https://")):
             url = "http://" + url
         if not (url[-1].isalpha() or url[-1].isnumeric() or url[-1] == "/"):
@@ -164,6 +167,7 @@ class LinkCheckerModule(BaseModule):
         ModuleSetting(
             key="ban_sub_links", label="Disallow links from subscribers", type="boolean", required=True, default=False
         ),
+        ModuleSetting(key="vip_exemption", label="Allow links from VIPs", type="boolean", required=True, default=False),
         ModuleSetting(
             key="timeout_length",
             label="Timeout length",
@@ -283,8 +287,34 @@ class LinkCheckerModule(BaseModule):
         ):
             return
 
-        do_timeout = False
-        ban_reason = "You are not allowed to post links in chat"
+        if self.settings["vip_exemption"] and source.vip is True:
+            return
+
+        if len(urls) > 0:
+            do_timeout = False
+            ban_reason = "You are not allowed to post links in chat"
+
+            if self.settings["ban_pleb_links"] is True and source.subscriber is False:
+                do_timeout = True
+                ban_reason = self.settings["pleb_timeout_reason"]
+            elif self.settings["ban_sub_links"] is True and source.subscriber is True:
+                do_timeout = True
+                ban_reason = self.settings["sub_timeout_reason"]
+
+            if do_timeout is True:
+                # Check if the links are in our super-whitelist. i.e. on the pajlada.se domain o forsen.tv
+                for url in urls:
+                    parsed_url = Url(url)
+                    if len(parsed_url.parsed.netloc.split(".")) < 2:
+                        continue
+                    whitelisted = False
+                    for whitelist in self.super_whitelist:
+                        if is_subdomain(parsed_url.parsed.netloc, whitelist):
+                            whitelisted = True
+                            break
+
+                    if whitelisted is False and self.is_whitelisted(url):
+                        whitelisted = True
 
         whisper_reason = (
             self.settings["pleb_timeout_reason"]

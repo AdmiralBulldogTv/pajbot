@@ -2,6 +2,7 @@ from pajbot.modules.base import BaseModule
 from pajbot.modules.base import ModuleSetting
 from pajbot.modules.base import ModuleType
 
+from pajbot.modules.actionchecker import ActionCheckerModule
 from pajbot.modules.ascii import AsciiProtectionModule
 from pajbot.modules.banphrase import BanphraseModule
 from pajbot.modules.basic import BasicCommandsModule
@@ -20,6 +21,7 @@ from pajbot.modules.basic.stream_update import StreamUpdateModule
 from pajbot.modules.bingo import BingoModule
 from pajbot.modules.casechecker import CaseCheckerModule
 from pajbot.modules.chat_alerts import ChatAlertModule
+from pajbot.modules.chat_alerts.cheeralert import CheerAlertModule
 from pajbot.modules.chat_alerts.livealert import LiveAlertModule
 from pajbot.modules.chat_alerts.newchatteralert import NewChatterAlertModule
 from pajbot.modules.chat_alerts.subalert import SubAlertModule
@@ -66,6 +68,7 @@ from pajbot.modules.quests.winduels import WinDuelsQuestModule
 from pajbot.modules.quests.winhsbetpoints import WinHsBetPointsQuestModule
 from pajbot.modules.quests.winhsbetwins import WinHsBetWinsQuestModule
 from pajbot.modules.quests.winraffle import WinRaffleQuestModule
+from pajbot.modules.queup import QueUpModule
 from pajbot.modules.raffle import RaffleModule
 from pajbot.modules.repspam import RepspamModule
 from pajbot.modules.roulette import RouletteModule
@@ -93,6 +96,7 @@ from pajbot.modules.songrequest import SongrequestModule
 available_modules = [
     AnalogyModule,
     AbCommandModule,
+    ActionCheckerModule,
     AdminCommandsModule,
     AsciiProtectionModule,
     BanphraseModule,
@@ -103,6 +107,7 @@ available_modules = [
     ChatAlertModule,
     ChattersRefreshModule,
     CheckModModule,
+    CheerAlertModule,
     ClipCommandModule,
     CLROverlayModule,
     EmoteComboModule,
@@ -145,6 +150,7 @@ available_modules = [
     PredictModule,
     PyramidModule,
     QuestModule,
+    QueUpModule,
     RaffleModule,
     RaidAlertModule,
     RandomRedeem,
