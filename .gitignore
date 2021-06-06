@@ -32,4 +32,6 @@ venv/
 .idea/
 .vscode/
 .vscode-server/
+.cache
+.aws
 .vim/

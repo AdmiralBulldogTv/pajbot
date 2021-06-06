@@ -44,6 +44,6 @@ google-api-python-client==1.7.11
 setuptools==42.0.2
 botocore==1.15.39
 boto3==1.12.39
-Werkzeug==0.16.1
+Werkzeug==2.0.1
 currencyconverter==0.13.9
 websocket_client==0.57.0

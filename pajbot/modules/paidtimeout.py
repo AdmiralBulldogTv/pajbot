@@ -36,7 +36,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Timeout length in seconds",
             default=60,
-            constraints={"min_value": 1, "max_value": 3600},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="cost",
@@ -45,7 +45,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Point cost",
             default=400,
-            constraints={"min_value": 1, "max_value": 1000000},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="second_command", label="Enable a second timeout command", type="boolean", required=True, default=False
@@ -66,7 +66,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Timeout length in seconds",
             default=60,
-            constraints={"min_value": 1, "max_value": 3600},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="cost2",
@@ -75,7 +75,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Point cost",
             default=400,
-            constraints={"min_value": 1, "max_value": 1000000},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="third_command", label="Enable a third timeout command", type="boolean", required=True, default=False
@@ -103,7 +103,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Point cost",
             default=400,
-            constraints={"min_value": 1, "max_value": 1000000},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="forth_command", label="Enable a forth timeout command", type="boolean", required=True, default=False
@@ -132,7 +132,7 @@ class PaidTimeoutModule(BaseModule):
             required=True,
             placeholder="Point cost",
             default=400,
-            constraints={"min_value": 1, "max_value": 1000000},
+            constraints={"min_value": 1},
         ),
         ModuleSetting(
             key="bypass_level",

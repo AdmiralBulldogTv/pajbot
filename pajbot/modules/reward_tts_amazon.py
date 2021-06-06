@@ -174,6 +174,7 @@ class RewardTTSModuleAmazon(BaseModule):
     def isReward(self, event):
         for eventTag in event.tags:
             if eventTag["key"] == "custom-reward-id":
+                print(eventTag["value"])
                 return eventTag["value"]
 
         return False
