@@ -55,7 +55,6 @@ from pajbot.modules.paidsubmode import PaidSubmodeModule
 from pajbot.modules.paidtimeout import PaidTimeoutModule
 from pajbot.modules.paiduntimeout import PaidUntimeoutModule
 from pajbot.modules.playsound import PlaysoundModule
-from pajbot.modules.pleblist import PleblistModule
 from pajbot.modules.pnsl import PNSLModule
 from pajbot.modules.pointlottery import PointLotteryModule
 from pajbot.modules.predict import PredictModule
@@ -82,13 +81,27 @@ from pajbot.modules.vip_refresh import VIPRefreshModule
 from pajbot.modules.warning import WarningModule
 from pajbot.modules.wolfram import WolframModule
 
+from pajbot.modules.analogy import AnalogyModule
+from pajbot.modules.bet import BetModule
+from pajbot.modules.convert_points import ConvertPoints
+from pajbot.modules.spotify_streamlabs import SpotifyStreamLabs
+from pajbot.modules.spotifyquery import SpotifySongQuery
+from pajbot.modules.reward_tts_amazon import RewardTTSModuleAmazon
+from pajbot.modules.reward_tts_streamlabs import RewardTTSModuleStreamLabs
+from pajbot.modules.random_redeem_points import RandomRedeem
+from pajbot.modules.taxation import TaxationModule
+from pajbot.modules.channel_point_timeout import ChannelPointTimeout
+from pajbot.modules.songrequest import SongrequestModule
+
 available_modules = [
+    AnalogyModule,
     AbCommandModule,
     ActionCheckerModule,
     AdminCommandsModule,
     AsciiProtectionModule,
     BanphraseModule,
     BasicCommandsModule,
+    BetModule,
     BingoModule,
     CaseCheckerModule,
     ChatAlertModule,
@@ -97,17 +110,19 @@ available_modules = [
     CheerAlertModule,
     ClipCommandModule,
     CLROverlayModule,
+    EmoteComboModule,
+    EmotesOnScreenModule,
+    ShowEmoteModule,
+    ConvertPoints,
     DBManageModule,
     DebugModule,
     DeckModule,
     DuelModule,
     DummyModule,
     EightBallModule,
-    EmoteComboModule,
     EmoteLimitModule,
     EmoteTimeoutModule,
     EmotesModule,
-    EmotesOnScreenModule,
     FollowAgeModule,
     GetTimedOutQuestModule,
     GivePointsModule,
@@ -130,7 +145,6 @@ available_modules = [
     PaidUntimeoutModule,
     PermabanModule,
     PlaysoundModule,
-    PleblistModule,
     PointLotteryModule,
     PointsResetModule,
     PredictModule,
@@ -139,13 +153,19 @@ available_modules = [
     QueUpModule,
     RaffleModule,
     RaidAlertModule,
+    RandomRedeem,
     RepspamModule,
+    RewardTTSModuleAmazon,
+    RewardTTSModuleStreamLabs,
     RouletteModule,
-    ShowEmoteModule,
     SlotMachineModule,
+    SongrequestModule,
+    SpotifyStreamLabs,
+    SpotifySongQuery,
     StreamUpdateModule,
     SubAlertModule,
     SubscriberFetchModule,
+    TaxationModule,
     TopModule,
     TriviaModule,
     TypeEmoteQuestModule,
