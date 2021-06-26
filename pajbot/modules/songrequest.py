@@ -2,7 +2,7 @@ import logging
 import datetime
 
 from pajbot.managers.handler import HandlerManager
-from pajbot.managers.songrequest import find_youtube_id_in_string, find_youtube_video_by_searcha
+from pajbot.managers.songrequest import find_youtube_id_in_string, find_youtube_video_by_search
 from pajbot.models.songrequest import SongrequestQueue
 from pajbot.models.command import Command
 from pajbot.modules import BaseModule
