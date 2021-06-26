@@ -391,7 +391,7 @@ class BingoModule(BaseModule):
                         CommandExample(
                             None,
                             "Cancel a bingo",
-                            chat="user:!bingo cancel\n" "bot: Bingo cancelled by pajlada FeelsBadMan",
+                            chat="user:!bingo cancel\n" "bot: Bingo cancelled by troydota FeelsBadMan",
                             description="",
                         ).parse()
                     ],
