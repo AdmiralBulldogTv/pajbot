@@ -1,11 +1,8 @@
 import logging
 import datetime
 
-from sqlalchemy import func
-
 from pajbot.managers.handler import HandlerManager
-from pajbot.managers.songrequest import find_youtube_id_in_string, find_youtube_video_by_search
-from pajbot.managers.songrequest_queue_manager import SongRequestQueueManager
+from pajbot.managers.songrequest import find_youtube_id_in_string, find_youtube_video_by_searcha
 from pajbot.models.songrequest import SongrequestQueue
 from pajbot.models.command import Command
 from pajbot.modules import BaseModule

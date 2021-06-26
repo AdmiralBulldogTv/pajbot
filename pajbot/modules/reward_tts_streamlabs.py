@@ -5,6 +5,7 @@ import re
 import time
 import threading
 import requests
+import boto3
 
 from pajbot.models.command import Command
 from pajbot.models.user import User

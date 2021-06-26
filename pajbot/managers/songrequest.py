@@ -582,7 +582,7 @@ class SongrequestManager:
         if self.current_song:
             if self.current_song.current_song_time > 5:
                 self.previous_queue = 0
-                histroy = self.current_song.to_histroy(self.db_session, skipped_by_id)
+                self.current_song.to_histroy(self.db_session, skipped_by_id)
             else:
                 self.current_song.purge(self.db_session)
             self.db_session.commit()

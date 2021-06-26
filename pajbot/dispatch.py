@@ -454,7 +454,7 @@ class Dispatch:
     @staticmethod
     def ban(bot, source, message, event, args):
         if not message:
-            bot.say(f"That user was not found in the user database")
+            bot.say("That user was not found in the user database")
             return False
 
         message_split = message.split()
@@ -463,27 +463,27 @@ class Dispatch:
             user = User.find_by_user_input(db_session, input)
 
             if user is None:
-                bot.say(f"That user was not found in the user database")
+                bot.say("That user was not found in the user database")
 
         bot.execute_delayed(1, bot.ban, user, " ".join(message_split[1:]))
 
     @staticmethod
     def timeout(bot, source, message, event, args):
         if not message:
-            bot.say(f"That user was not found in the user database")
+            bot.say("That user was not found in the user database")
             return False
 
         message_split = message.split()
         input = message_split[0]
         if len(message_split) < 2:
-            bot.say(f"No timeout duration specified")
+            bot.say("No timeout duration specified")
             return False
 
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             user = User.find_by_user_input(db_session, input)
 
             if user is None:
-                bot.say(f"That user was not found in the user database")
+                bot.say("That user was not found in the user database")
                 return False
 
         bot.execute_delayed(1, bot.timeout, user, message_split[1], " ".join(message_split[2:]))
@@ -491,7 +491,7 @@ class Dispatch:
     @staticmethod
     def unban(bot, source, message, event, args):
         if not message:
-            bot.say(f"That user was not found in the user database")
+            bot.say("That user was not found in the user database")
             return False
 
         input = message.split(" ")[0]
@@ -499,6 +499,6 @@ class Dispatch:
             user = User.find_by_user_input(db_session, input)
 
             if user is None:
-                bot.say(f"That user was not found in the user database")
+                bot.say("That user was not found in the user database")
 
         bot.execute_delayed(1, bot.unban, user)

@@ -4,7 +4,7 @@ import logging
 import base64
 import urllib
 from json import JSONDecodeError
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from flask import redirect
 from flask import render_template

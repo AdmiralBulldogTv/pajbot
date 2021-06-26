@@ -149,7 +149,7 @@ class DuelModule(BaseModule):
         """
 
         if message is None:
-            bot.whisper(source, f"Invalid Usage !duel USERNAME POINTS_TO_BET")
+            bot.whisper(source, "Invalid Usage !duel USERNAME POINTS_TO_BET")
             return False
 
         max_pot = self.settings["max_pot"]

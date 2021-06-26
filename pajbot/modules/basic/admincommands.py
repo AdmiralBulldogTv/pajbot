@@ -76,14 +76,14 @@ class AdminCommandsModule(BaseModule):
         msg_split = message.split(" ")
         if len(msg_split) < 1:
             # The user did not supply enough arguments
-            bot.whisper(source, f"Usage: !masspoints POINTS")
+            bot.whisper(source, "Usage: !masspoints POINTS")
             return False
 
         try:
             num_points = int(msg_split[0])
         except (ValueError, TypeError):
             # The user did not specify a valid integer for points
-            bot.whisper(source, f"Invalid amount of points. Usage: !masspoints USERNAME POINTS")
+            bot.whisper(source, "Invalid amount of points. Usage: !masspoints USERNAME POINTS")
             return False
 
         chatter_logins = bot.twitch_tmi_api.get_chatter_logins_by_login(bot.streamer)
