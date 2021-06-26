@@ -1,5 +1,6 @@
 import logging
 import json
+from typing import Dict
 
 from pajbot.managers.redis import RedisManager
 
@@ -11,7 +12,7 @@ class SongRequestQueueManager:
     streamer_name = None
     redis = None
     song_playing_id = None
-    song_queues = {}
+    song_queues: Dict = {}
 
     @staticmethod
     def init(streamer_name):

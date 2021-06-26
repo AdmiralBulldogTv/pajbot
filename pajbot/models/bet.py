@@ -39,7 +39,7 @@ class BetGame(Base):
     def is_running(self):
         return self.outcome is None
 
-    @is_running.expression
+    @is_running.expression  # type: ignore
     def is_running(self):
         return self.outcome.is_(None)
 
@@ -47,7 +47,7 @@ class BetGame(Base):
     def betting_open(self):  # Remove 'and not None' check since it's not nullable
         return self.is_running and self.bets_closed is False
 
-    @betting_open.expression
+    @betting_open.expression  # type: ignore
     def betting_open(self):
         return and_(self.is_running, self.bets_closed.is_(False))
 
