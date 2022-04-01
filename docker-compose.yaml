@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    environment:
+      REDIS_PASSWORD: redis
+    ports:
+      - 6379:6379
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  pajbot:
+    build:
+      context: .
+    ports:
+      - 3000:3000
+    volumes:
+      - ./configs/config.ini:/app/configs/config.ini

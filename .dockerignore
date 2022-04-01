@@ -1,0 +1,37 @@
+# Python-specific stuff
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# system files
+.DS_Store
+
+# PID files
+.*.pid
+
+# Log folder
+logs/
+
+# Config folder
+configs/
+uwsgiconfigs/
+config.ini
+/*.ini
+!uwsgi_cache.ini
+!uwsgi_shared.ini
+!configs/example.ini
+!.mypy.ini
+
+# User created code
+userdispatch.py
+
+# Ignore virtual environment folder
+venv/
+.venv/
+
+.idea/
+.vscode/
+.vscode-server/
+.vim/
