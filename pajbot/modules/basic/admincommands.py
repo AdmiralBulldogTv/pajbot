@@ -116,7 +116,7 @@ class AdminCommandsModule(BaseModule):
             row = db_session.execute(
                 """WITH rows AS (
                         UPDATE "user"
-                            SET points = points + :points 
+                            SET points = points + :points
                         WHERE last_seen > NOW() - INTERVAL '10 minutes'
                         RETURNING 1
                     )

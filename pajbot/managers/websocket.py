@@ -103,7 +103,9 @@ class WebSocketManager:
                 port = int(cfg.get("port", "0"))
                 key_path = cfg.get("key_path", "")
                 crt_path = cfg.get("crt_path", "")
-                unix_socket_path = cfg.get("unix_socket", f"/var/run/pajbot/{streamer}/websocket.sock") if port == 0 else None
+                unix_socket_path = (
+                    cfg.get("unix_socket", f"/var/run/pajbot/{streamer}/websocket.sock") if port == 0 else None
+                )
 
                 if ssl:
                     if key_path == "" or crt_path == "":
