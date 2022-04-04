@@ -90,9 +90,9 @@ class APIPleblistAdd(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("youtube_id", trim=True, required=True)
-        self.post_parser.add_argument("password", trim=True, required=True)
-        self.post_parser.add_argument("skip_after", type=int, default=None, required=False)
+        self.post_parser.add_argument("youtube_id", trim=True, required=True, location="form")
+        self.post_parser.add_argument("password", trim=True, required=True, location="form")
+        self.post_parser.add_argument("skip_after", type=int, default=None, required=False, location="form")
 
     def post(self):
         args = self.post_parser.parse_args()
@@ -129,8 +129,8 @@ class APIPleblistNext(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("song_id", type=int, required=True)
-        self.post_parser.add_argument("password", trim=True, required=True)
+        self.post_parser.add_argument("song_id", type=int, required=True, location="form")
+        self.post_parser.add_argument("password", trim=True, required=True, location="form")
 
     def post(self):
         args = self.post_parser.parse_args()
@@ -165,7 +165,7 @@ class APIPleblistValidate(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("youtube_id", trim=True, required=True)
+        self.post_parser.add_argument("youtube_id", trim=True, required=True, location="form")
 
     def post(self):
         args = self.post_parser.parse_args()

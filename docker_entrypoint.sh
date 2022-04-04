@@ -28,4 +28,4 @@ wait -n
 
 echo "Shutting down :("
 
-exit $? + 127
+exit $?

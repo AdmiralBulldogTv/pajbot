@@ -96,6 +96,40 @@ class AdminCommandsModule(BaseModule):
 
             bot.whisper(source, f"Successfully set {user}'s points to {num_points}.")
 
+    def mass_points(self, bot, source, message, **rest):
+        if not message:
+            return False
+
+        msg_split = message.split(" ")
+        if len(msg_split) < 1:
+            # The user did not supply enough arguments
+            bot.whisper(source, f"Usage: !{self.command_name} POINTS")
+            return False
+        try:
+            num_points = int(msg_split[0])
+        except (ValueError, TypeError):
+            # The user did not specify a valid integer for points
+            bot.whisper(source, f"Invalid amount of points. Usage: !{self.command_name} POINTS")
+            return False
+
+        with DBManager.create_session_scope() as db_session:
+            row = db_session.execute(
+                """WITH rows AS (
+                        UPDATE "user"
+                            SET points = points + :points 
+                        WHERE last_seen > NOW() - INTERVAL '10 minutes'
+                        RETURNING 1
+                    )
+                    SELECT count(*) AS count FROM rows;
+                """,
+                {
+                    "points": num_points,
+                },
+            ).first()
+            count = int(row[0])
+
+        bot.say(f"Gave {num_points} points to {count} chatters.")
+
     @staticmethod
     def level(bot, source, message, **rest):
         if not message:
@@ -280,6 +314,19 @@ class AdminCommandsModule(BaseModule):
                     "Remove points from a user",
                     chat="user:!editpoints pajlada -500\n" "bot>user:Successfully removed 500 points from pajlada.",
                     description="This removes 500 points from pajlada. Users can go into negative points with this.",
+                ).parse(),
+            ],
+        )
+        self.commands["masspoints"] = Command.raw_command(
+            self.mass_points,
+            level=1500,
+            description="Modifies a lot of users' points",
+            examples=[
+                CommandExample(
+                    None,
+                    "Give everyone active in the last 10min points",
+                    chat="user:!masspoints 500\n" "bot: Successfully gave 500 points to 100 chatters.",
+                    description="This gives 500 points to all active chatters in the last 10min",
                 ).parse(),
             ],
         )

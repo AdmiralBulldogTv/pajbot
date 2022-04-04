@@ -11,7 +11,7 @@ class APISocialSet(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("value", trim=True, required=True)
+        self.post_parser.add_argument("value", trim=True, required=True, location="form")
 
     @pajbot.web.utils.requires_level(500)
     def post(self, social_key, **options):

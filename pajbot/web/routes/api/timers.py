@@ -31,7 +31,7 @@ class APITimerToggle(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("new_state", required=True)
+        self.post_parser.add_argument("new_state", required=True, location="form")
 
     @pajbot.web.utils.requires_level(500)
     def post(self, row_id, **options):

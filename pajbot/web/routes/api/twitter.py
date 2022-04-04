@@ -40,7 +40,7 @@ class APITwitterUnfollow(Resource):
     def __init__(self):
         super().__init__()
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("username", required=True, trim=True)
+        self.post_parser.add_argument("username", required=True, trim=True, location="form")
 
     @requires_level(1000)
     def post(self, **options):
@@ -63,7 +63,7 @@ class APITwitterFollow(Resource):
     def __init__(self):
         super().__init__()
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("username", required=True, trim=True)
+        self.post_parser.add_argument("username", required=True, trim=True, location="form")
 
     @requires_level(1000)
     def post(self, **options):

@@ -229,8 +229,8 @@ def jsonify_list(key, query, base_url=None, default_limit=None, max_limit=None, 
 
 
 paginate_parser = reqparse.RequestParser()
-paginate_parser.add_argument("limit", type=int, required=False)
-paginate_parser.add_argument("offset", type=int, required=False)
+paginate_parser.add_argument("limit", type=int, required=False, location="form")
+paginate_parser.add_argument("offset", type=int, required=False, location="form")
 
 
 def seconds_to_vodtime(t):

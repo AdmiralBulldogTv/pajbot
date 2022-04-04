@@ -74,18 +74,18 @@ class APICommandUpdate(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("data_level", required=False)
-        self.post_parser.add_argument("data_enabled", required=False)
-        self.post_parser.add_argument("data_delay_all", required=False)
-        self.post_parser.add_argument("data_delay_user", required=False)
-        self.post_parser.add_argument("data_cost", required=False)
-        self.post_parser.add_argument("data_can_execute_with_whisper", required=False)
-        self.post_parser.add_argument("data_sub_only", required=False)
-        self.post_parser.add_argument("data_mod_only", required=False)
-        self.post_parser.add_argument("data_action_type", required=False)
-        self.post_parser.add_argument("data_action_message", required=False)
-        self.post_parser.add_argument("data_use_global_cd", required=False)
-        self.post_parser.add_argument("run_through_banphrases", required=False)
+        self.post_parser.add_argument("data_level", required=False, location="form")
+        self.post_parser.add_argument("data_enabled", required=False, location="form")
+        self.post_parser.add_argument("data_delay_all", required=False, location="form")
+        self.post_parser.add_argument("data_delay_user", required=False, location="form")
+        self.post_parser.add_argument("data_cost", required=False, location="form")
+        self.post_parser.add_argument("data_can_execute_with_whisper", required=False, location="form")
+        self.post_parser.add_argument("data_sub_only", required=False, location="form")
+        self.post_parser.add_argument("data_mod_only", required=False, location="form")
+        self.post_parser.add_argument("data_action_type", required=False, location="form")
+        self.post_parser.add_argument("data_action_message", required=False, location="form")
+        self.post_parser.add_argument("data_use_global_cd", required=False, location="form")
+        self.post_parser.add_argument("run_through_banphrases", required=False, location="form")
 
     @pajbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
@@ -192,7 +192,7 @@ class APICommandCheckAlias(Resource):
         super().__init__()
 
         self.post_parser = reqparse.RequestParser()
-        self.post_parser.add_argument("alias", required=True)
+        self.post_parser.add_argument("alias", required=True, location="form")
 
     @pajbot.web.utils.requires_level(500)
     def post(self, **extra_args):
