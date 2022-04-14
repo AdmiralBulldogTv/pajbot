@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple
 
 import logging
 import math
@@ -602,3 +602,23 @@ class TwitchHelixAPI(BaseTwitchAPI):
             expiry=60 * 60,
             force_fetch=force_fetch,
         )
+
+    def start_commercial(
+        self, channel_id: str, length: Literal["30", "60", "90", "120", "150", "180"], authorization
+    ) -> Tuple[str, bool]:
+        try:
+            resp = self.post(
+                "/channels/commercial",
+                json={"broadcaster_id": channel_id, "length": length},
+                authorization=authorization,
+            )
+
+            return resp["data"][0]["message"], True
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                return (
+                    f"The streamer has not authorized the bot with the scoped required to run a commercial. {e.response.text}",
+                    False,
+                )
+
+            return e.response.text, False

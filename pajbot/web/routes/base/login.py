@@ -47,7 +47,7 @@ def init(app):
         "clips:edit",
     ]
 
-    streamer_scopes = ["channel:read:subscriptions", "channel:manage:broadcast"]
+    streamer_scopes = ["channel:read:subscriptions", "channel:manage:broadcast", "channel:edit:commercial"]
 
     @app.route("/login")
     def login():

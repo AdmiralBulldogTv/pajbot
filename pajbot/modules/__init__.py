@@ -3,6 +3,7 @@ from pajbot.modules.base import BaseModule, ModuleSetting, ModuleType  # isort:s
 
 from pajbot.modules.actionchecker import ActionCheckerModule
 from pajbot.modules.ascii import AsciiProtectionModule
+from pajbot.modules.auto_ads import AutoAdsModule
 from pajbot.modules.banphrase import BanphraseModule
 from pajbot.modules.basic import BasicCommandsModule
 from pajbot.modules.basic.ab import AbCommandModule
@@ -85,6 +86,7 @@ available_modules = [
     ActionCheckerModule,
     AdminCommandsModule,
     AsciiProtectionModule,
+    AutoAdsModule,
     BanphraseModule,
     BasicCommandsModule,
     BingoModule,

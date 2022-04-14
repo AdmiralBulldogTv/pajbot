@@ -51,6 +51,7 @@ from pajbot.tmi import CHARACTER_LIMIT, TMIRateLimits, WhisperOutputMode
 
 import irc.client
 import requests
+import schedule
 from pytz import timezone
 
 if TYPE_CHECKING:
@@ -183,6 +184,8 @@ class Bot:
         # e.g. on actions via bot.execute_now, etc.
         self.reactor.scheduler_class = SafeDefaultScheduler
         self.reactor.scheduler = SafeDefaultScheduler()
+
+        self.execute_every(1, schedule.run_pending)
 
         self.start_time = utils.now()
         ActionParser.bot = self

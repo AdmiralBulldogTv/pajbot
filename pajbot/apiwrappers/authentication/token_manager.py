@@ -83,6 +83,9 @@ class AccessTokenManager(ABC):
 
         return self._token
 
+    def can_refresh(self) -> bool:
+        return self._token.can_refresh() if self._token is not None else False
+
 
 class AppAccessTokenManager(AccessTokenManager):
     def __init__(self, api, redis, scope=[], token=None):
