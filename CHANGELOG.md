@@ -14,6 +14,7 @@ Remember to bring your dependencies up to date with `./scripts/venvinstall.sh` w
 - Minor: Added the `announce` message type. (#1847)
 - Minor: Updated `me` method in `send_message_to_user` function to include user ping. (#1874)
 - Minor: Set the ignore, admincommands, dbmanage & debug modules as hidden due to their un-toggleable and un-configurable nature. (#1835)
+- Minor: Add `$(randomchoice)` variable which picks a random value from the ones provided. Example: `$(randomchoice:"foo", "bar", "baz")`. (#1920)
 - Bugfix: Fix web commands list buttons not working. (#1893)
 - Bugfix: Fix `!add command` not working. (#1892)
 - Bugfix: Command response type now sticks properly when a command is edited through chat. (#1846)
@@ -25,7 +26,7 @@ Remember to bring your dependencies up to date with `./scripts/venvinstall.sh` w
 - Bugfix: Work around no VIPs being refreshed through VIP refresh module in some cases. (#1862)
 - Dev: Use Fomantic-UI native slider instead of the semantic-ui-range library. (#1895)
 - Dev: Migrate `delete_or_timeout` function to main bot class. (#1872)
-- Dev: Moved javascript and css web dependencies into a dedicated folder in order to centralize importing and updates. (#1843, #1841, #1840, #1842, #1896, #1899, #1897, #1900, #1901, #1902, #1898)
+- Dev: Moved javascript and css web dependencies into a dedicated folder in order to centralize importing and updates. (#1843, #1841, #1840, #1842, #1896, #1899, #1897, #1900, #1901, #1902, #1898, #1932)
 - Dev: Migrate from `flask_restful` to `marshmallow` for handling request parameter parsing. (#1809)
 
 ## v1.60
