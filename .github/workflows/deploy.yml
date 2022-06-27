@@ -75,3 +75,4 @@ jobs:
 
           kubectl patch -n $KUBE_NAMESPACE $KUBE_RESOURCE lacari --type="json" -p="$KUBE_IMAGE_PATCH"
           kubectl patch -n $KUBE_NAMESPACE $KUBE_RESOURCE filian --type="json" -p="$KUBE_IMAGE_PATCH"
+          kubectl patch -n $KUBE_NAMESPACE $KUBE_RESOURCE quqco --type="json" -p="$KUBE_IMAGE_PATCH"
