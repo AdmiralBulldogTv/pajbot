@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 COPY scripts/venvinstall.sh scripts/venvinstall.sh
 
-RUN PIP_DEFAULT_TIMEOUT=100 ./scripts/venvinstall.sh
+RUN ./scripts/venvinstall.sh
 
 COPY . .
 
