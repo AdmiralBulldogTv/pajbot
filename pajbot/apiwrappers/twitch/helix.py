@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, Literal
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 import logging
 import math
