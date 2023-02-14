@@ -1,17 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import logging
 
 from pajbot.managers.adminlog import AdminLogManager
 from pajbot.managers.db import DBManager
 from pajbot.models.command import Command, CommandExample
 from pajbot.models.user import User
-from pajbot.modules import BaseModule, ModuleSetting, ModuleType
+from pajbot.modules.base import BaseModule, ModuleSetting, ModuleType
 from pajbot.modules.basic import BasicCommandsModule
+
+if TYPE_CHECKING:
+    from pajbot.bot import Bot
 
 log = logging.getLogger(__name__)
 
 
 class PermabanModule(BaseModule):
-
     ID = __name__.split(".")[-1]
     NAME = "Permaban"
     DESCRIPTION = "Permabans a user (re-bans them if unbanned by a mod)"
@@ -46,7 +52,7 @@ class PermabanModule(BaseModule):
     ]
 
     @staticmethod
-    def permaban_command(bot, source, message, **rest) -> bool:
+    def permaban_command(bot: Bot, source: User, message: str, **rest) -> bool:
         if not message:
             return False
 
@@ -73,7 +79,7 @@ class PermabanModule(BaseModule):
 
         return True
 
-    def unpermaban_command(self, bot, source, message, **rest) -> bool:
+    def unpermaban_command(self, bot: Bot, source: User, message: str, **rest) -> bool:
         if not message:
             return False
 
@@ -98,7 +104,7 @@ class PermabanModule(BaseModule):
                 bot.unban(user)
 
                 if self.settings["enable_send_timeout"] is True:
-                    bot.timeout(user, 1, self.settings["timeout_reason"].format(source=source), once=True)
+                    bot.timeout(user, 1, self.settings["timeout_reason"].format(source=source))
 
         return True
 

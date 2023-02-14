@@ -58,7 +58,6 @@ from pajbot.modules.pnsl import PNSLModule
 from pajbot.modules.pointlottery import PointLotteryModule
 from pajbot.modules.pyramid import PyramidModule
 from pajbot.modules.quest import QuestModule
-from pajbot.modules.quests.gettimedout import GetTimedOutQuestModule
 from pajbot.modules.quests.typeemote import TypeEmoteQuestModule
 from pajbot.modules.quests.typememessage import TypeMeMessageQuestModule
 from pajbot.modules.quests.winduelpoints import WinDuelPointsQuestModule
@@ -107,7 +106,6 @@ available_modules = [
     EmotesModule,
     EmotesOnScreenModule,
     FollowAgeModule,
-    GetTimedOutQuestModule,
     GivePointsModule,
     GlobalCommandCooldown,
     IgnoreModule,
