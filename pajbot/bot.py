@@ -186,7 +186,16 @@ class Bot:
         self.action_queue = ActionQueue()
 
         # refresh points_rank and num_lines_rank regularly
-        UserRanksRefreshManager.start(self.action_queue)
+
+        rank_refresh_mode = config["main"].get("rank_refresh_mode", "0")
+        if rank_refresh_mode == "0":
+            UserRanksRefreshManager.start(self.action_queue)
+        elif rank_refresh_mode == "1":
+            UserRanksRefreshManager.run_once(self.action_queue)
+        elif rank_refresh_mode == "2":
+            log.info("Not refreshing user rank")
+        else:
+            log.error(f"Invalid rank refresh mode {rank_refresh_mode}, valid options are: 0, 1, or 2")
 
         self.reactor = irc.client.Reactor()
         # SafeDefaultScheduler makes the bot not exit on exception in the main thread
@@ -552,7 +561,7 @@ class Bot:
 
     # event is an event to clone and change the text from.
     # Usage: !eval bot.eval_from_file(event, 'https://pastebin.com/raw/LhCt8FLh')
-    def eval_from_file(self, event, url):
+    def eval_from_file(self, event, url) -> None:
         try:
             r = requests.get(url, headers={"User-Agent": self.user_agent})
             r.raise_for_status()
@@ -579,7 +588,7 @@ class Bot:
         if channel is None:
             channel = self.channel
 
-        self.irc.privmsg(channel, message, is_whisper=False)
+        self.irc.privmsg(channel, message)
 
     def c_uptime(self) -> str:
         return utils.time_ago(self.start_time)
@@ -658,11 +667,14 @@ class Bot:
 
     def ban_login(self, login: str, reason: Optional[str] = None) -> None:
         user_id = self.twitch_helix_api.get_user_id(login)
+        if user_id is None:
+            log.error(f"Attempted to ban user with login {login}, but no such user was found")
+            return
+
         if self._has_moderation_actions():
             self.thread_locals.moderation_actions.add(login, Ban(reason))
         else:
-            self.timeout_login(login, 30, reason, once=True)
-            self.execute_delayed(1, self.ban_id, user_id, reason)
+            self.ban_id(user_id, reason)
 
     def _unban(self, user_id: str) -> None:
         try:
@@ -690,41 +702,84 @@ class Bot:
         else:
             self.unban_id(user_id)
 
+    def _untimeout(self, user_id: str) -> None:
+        try:
+            ban_data = self.twitch_helix_api.get_banned_user(
+                self.streamer.id, self.streamer_access_token_manager, user_id
+            )
+            if ban_data is None:
+                log.warning(f"User with ID {user_id} is already not banned or timed-out.")
+                return
+            # As per the Helix docs, expires_at will return empty if the user is permabanned.
+            if not ban_data.expires_at:
+                log.error(f"User with ID {user_id} is currently banned! Will not untimeout.")
+                return
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                log.error(f"Failed to get banned user status with id {user_id}, unauthorized: {e} - {e.response.text}")
+                return
+            else:
+                log.error(f"Failed to get banned user status with id {user_id}: {e} - {e.response.text}")
+                return
+
+        try:
+            self.twitch_helix_api.unban_user(self.streamer.id, self.bot_user.id, user_id, self.bot_token_manager)
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                log.error(f"Failed to untimeout user with id {user_id}, unauthorized: {e} - {e.response.text}")
+            else:
+                log.error(f"Failed to untimeout user with id {user_id}: {e} - {e.response.text}")
+
     def untimeout(self, user: User) -> None:
-        self.untimeout_login(user.login)
+        self.untimeout_id(user.id)
+
+    def untimeout_id(self, user_id: str) -> None:
+        self._untimeout(user_id)
 
     def untimeout_login(self, login: str) -> None:
+        user_id = self.twitch_helix_api.get_user_id(login)
+        if user_id is None:
+            log.error(f"Attempted to untimeout user with login {login}, but no such user was found")
+            return
+
         if self._has_moderation_actions():
             self.thread_locals.moderation_actions.add(login, Untimeout())
         else:
-            self.privmsg(f"/untimeout {login}")
+            self.untimeout_id(user_id)
 
-    def _timeout(self, login: str, duration: int, reason: Optional[str] = None) -> None:
-        message = f"/timeout {login} {duration}"
-        if reason is not None:
-            message += f" {reason}"
-        self.privmsg(message)
+    def timeout(self, user: User, duration: int, reason: Optional[str] = None) -> None:
+        self.timeout_login(user.login, duration, reason)
 
-    def timeout(self, user: User, duration: int, reason: Optional[str] = None, once: bool = False) -> None:
-        self.timeout_login(user.login, duration, reason, once)
+    def _timeout(self, user_id: str, duration: int, reason: Optional[str] = None) -> None:
+        try:
+            if reason:
+                reason = f"forsen - {reason} - forsen"
+            self.twitch_helix_api.timeout_user(
+                self.streamer.id, self.bot_user.id, self.bot_token_manager, user_id, duration, reason
+            )
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                log.error(f"Failed to timeout user with id {user_id}, unauthorized: {e} - {e.response.text}")
+            else:
+                log.error(f"Failed to timeout user with id {user_id}: {e} - {e.response.text}")
 
-    def timeout_login(self, login: str, duration: int, reason: Optional[str] = None, once: bool = False) -> None:
+    def timeout_login(self, login: str, duration: int, reason: Optional[str] = None) -> None:
         if self._has_moderation_actions():
-            self.thread_locals.moderation_actions.add(login, Timeout(duration, reason, once))
+            self.thread_locals.moderation_actions.add(login, Timeout(duration, reason))
         else:
-            self._timeout(login, duration, reason)
-            if not once:
-                self.execute_delayed(1, self._timeout, login, duration, reason)
+            user_id = self.twitch_helix_api.get_user_id(login)
+            if user_id is None:
+                log.error(f"Attempted to ban user with login {login}, but no such user was found")
+                return
+            self._timeout(user_id, duration, reason)
 
-    def timeout_warn(
-        self, user: User, duration: int, reason: Optional[str] = None, once: bool = False
-    ) -> Tuple[int, str]:
+    def timeout_warn(self, user: User, duration: int, reason: Optional[str] = None) -> Tuple[int, str]:
         from pajbot.modules import WarningModule
 
         duration, punishment = user.timeout(
             duration, warning_module=cast(Optional[WarningModule], self.module_manager["warning"])
         )
-        self.timeout(user, duration, reason, once)
+        self.timeout(user, duration, reason)
         return (duration, punishment)
 
     def delete_message(self, msg_id: str, channel_id: Optional[str] = None) -> None:
@@ -750,7 +805,6 @@ class Bot:
         duration: int,
         reason: Optional[str] = None,
         disable_warnings: bool = False,
-        once: bool = False,
     ) -> None:
         if moderation_action not in ("Delete", "Timeout"):
             raise ValueError("moderation_action must only equal Delete or Timeout!")
@@ -761,13 +815,19 @@ class Bot:
             self.delete_message(msg_id)
         elif moderation_action == "Timeout":
             if disable_warnings:
-                self.timeout(user, duration, reason, once)
+                self.timeout(user, duration, reason)
             else:
-                self.timeout_warn(user, duration, reason, once)
+                self.timeout_warn(user, duration, reason)
 
-    def whisper(self, user: User, message: str) -> None:
+    def whisper(self, user: User | UserBasics, message: str) -> None:
         if self.whisper_output_mode == WhisperOutputMode.NORMAL:
-            self.irc.whisper(user.login, message)
+            try:
+                self.twitch_helix_api.send_whisper(self.bot_user.id, user.id, message, self.bot_token_manager)
+            except HTTPError as e:
+                if e.response.status_code == 401:
+                    log.error(f"Failed to send whisper, unauthorized: {e} - {e.response.text}")
+                else:
+                    log.error(f"Failed to send whisper: {e} - {e.response.text}")
         if self.whisper_output_mode == WhisperOutputMode.CHAT:
             self.privmsg(f"{user}, {message}")
         if self.whisper_output_mode == WhisperOutputMode.CONTROL_HUB:
@@ -783,20 +843,12 @@ class Bot:
             log.debug(f'Whisper "{message}" to user "{user}" was not sent (due to config setting)')
 
     def whisper_login(self, login: str, message: str) -> None:
-        if self.whisper_output_mode == WhisperOutputMode.NORMAL:
-            self.irc.whisper(login, message)
-        if self.whisper_output_mode == WhisperOutputMode.CHAT:
-            self.privmsg(f"{login}, {message}")
-        if self.whisper_output_mode == WhisperOutputMode.CONTROL_HUB:
-            if self.control_hub_channel is not None:
-                self.privmsg(f"{login}, {message}", self.control_hub_channel)
-            else:
-                log.warning(
-                    "Whisper output mode set to `control_hub` but no control hub configured in config, "
-                    f"the following whisper will not be sent: To {login}: {message}"
-                )
-        elif self.whisper_output_mode == WhisperOutputMode.DISABLED:
-            log.debug(f'Whisper "{message}" to user "{login}" was not sent (due to config setting)')
+        user = self.twitch_helix_api.get_user_basics_by_login(login)
+        if user is None:
+            log.error(f"No user with the login '{login}' found, cannot send whisper")
+            return
+
+        self.whisper(user, message)
 
     def send_message_to_user(
         self, user: User, message: str, event, method: str = "say", check_msg: bool = False
