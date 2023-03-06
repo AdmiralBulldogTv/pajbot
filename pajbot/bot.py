@@ -105,12 +105,7 @@ class Bot:
         RedisManager.init(redis_options)
         utils.wait_for_redis_data_loaded(RedisManager.get())
 
-        if cfg.get_boolean(config["main"], "verified", False):
-            self.tmi_rate_limits = TMIRateLimits.VERIFIED
-        elif cfg.get_boolean(config["main"], "known", False):
-            self.tmi_rate_limits = TMIRateLimits.KNOWN
-        else:
-            self.tmi_rate_limits = TMIRateLimits.BASE
+        self.tmi_rate_limits = TMIRateLimits.BASE
 
         self.whisper_output_mode = WhisperOutputMode.from_config_value(
             config["main"].get("whisper_output_mode", "normal")
@@ -187,11 +182,12 @@ class Bot:
 
         # refresh points_rank and num_lines_rank regularly
 
+        self.user_ranks_refresh_manager = UserRanksRefreshManager(config)
         rank_refresh_mode = config["main"].get("rank_refresh_mode", "0")
         if rank_refresh_mode == "0":
-            UserRanksRefreshManager.start(self.action_queue)
+            self.user_ranks_refresh_manager.start(self.action_queue)
         elif rank_refresh_mode == "1":
-            UserRanksRefreshManager.run_once(self.action_queue)
+            self.user_ranks_refresh_manager.run_once(self.action_queue)
         elif rank_refresh_mode == "2":
             log.info("Not refreshing user rank")
         else:
@@ -257,6 +253,9 @@ class Bot:
             socket_manager=self.socket_manager, module_manager=self.module_manager, bot=self
         ).load()
         self.websocket_manager = WebSocketManager(self)
+        self.twitter_disallow_write = False
+        if "twitter" in config:
+            self.twitter_disallow_write = cfg.get_boolean(config["twitter"], "disallow_write", False)
 
         HandlerManager.trigger("on_managers_loaded")
 
