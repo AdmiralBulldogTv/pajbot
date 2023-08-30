@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import datetime
 import logging
 import random
+from dataclasses import dataclass
 from datetime import timedelta
 
 from pajbot import utils
@@ -34,6 +35,15 @@ class DuelModule(BaseModule):
             required=True,
             placeholder="",
             default=420,
+            constraints={"min_value": 0, "max_value": 1000000},
+        ),
+        ModuleSetting(
+            key="min_pot",
+            label="The minimum amount of points that must be used for a duel",
+            type="number",
+            required=True,
+            placeholder="",
+            default=0,
             constraints={"min_value": 0, "max_value": 1000000},
         ),
         ModuleSetting(
@@ -82,7 +92,11 @@ class DuelModule(BaseModule):
             constraints={"min_value": 0, "max_value": 240},
         ),
         ModuleSetting(
-            key="show_on_clr", label="Show duels on the clr overlay", type="boolean", required=True, default=True
+            key="show_on_clr",
+            label="Show duels on the clr overlay",
+            type="boolean",
+            required=True,
+            default=True,
         ),
         ModuleSetting(
             key="max_duel_age",
@@ -162,6 +176,19 @@ class DuelModule(BaseModule):
             return False
 
         max_pot = self.settings["max_pot"]
+        assert isinstance(max_pot, int)
+        min_pot = self.settings["min_pot"]
+        assert isinstance(min_pot, int)
+
+        msg_id = rest["args"]["msg_id"]
+        assert isinstance(msg_id, str)
+
+        if min_pot > max_pot:
+            bot.reply(
+                msg_id,
+                f"Duel module is misconfigured, the minimum duel amount ({min_pot}) is higher than the maximum duel amount ({max_pot})",
+            )
+            return False
 
         msg_split = message.split()
         input = msg_split[0]
@@ -183,6 +210,13 @@ class DuelModule(BaseModule):
                         duel_price = max_pot
                 except ValueError:
                     pass
+
+            if duel_price < min_pot:
+                bot.whisper(
+                    source,
+                    f"You must duel for at least {min_pot} points.",
+                )
+                return False
 
             if source.id in self.duel_requests:
                 currently_duelling = User.find_by_id(db_session, self.duel_requests[source.id])
@@ -385,7 +419,7 @@ class DuelModule(BaseModule):
                 bot.whisper(source, "You have no duel request or duel target. Type !duel USERNAME POT to duel someone!")
 
     @staticmethod
-    def get_duel_stats(bot: Bot, source: User, **rest: Any) -> None:
+    def get_duel_stats(bot: Bot, source: User, **rest: Any) -> bool:
         """
         Whispers the users duel winratio to the user
         """
@@ -398,10 +432,17 @@ class DuelModule(BaseModule):
             f"duels: {source.duel_stats.duels_total} winrate: {source.duel_stats.winrate:.2f}% streak: {source.duel_stats.current_streak} profit: {source.duel_stats.profit}",
         )
 
+        return True
+
     def _cancel_expired_duels(self) -> None:
-        if self.bot is None:
-            log.warn("_cancel_expired_duels of DuelModule failed because bot is None")
-            return
+        assert self.bot is not None
+
+        @dataclass
+        class DuelRemoval:
+            source_id: str
+            target_id: str
+
+        duels_to_remove: List[DuelRemoval] = []
 
         now = utils.now()
         for source_id, started_at in self.duel_begin_time.items():
@@ -417,13 +458,21 @@ class DuelModule(BaseModule):
 
                 target_id = self.duel_requests[source.id]
 
-                del self.duel_targets[target_id]
-                del self.duel_requests[source.id]
-                del self.duel_request_price[source.id]
-                del self.duel_begin_time[source.id]
+                duels_to_remove.append(DuelRemoval(source.id, target_id))
 
-                challenged = User.find_by_id(db_session, target_id)
+        for duel in duels_to_remove:
+            del self.duel_targets[duel.target_id]
+            del self.duel_requests[duel.source_id]
+            del self.duel_request_price[duel.source_id]
+            del self.duel_begin_time[duel.source_id]
+
+            with DBManager.create_session_scope() as db_session:
+                challenged = User.find_by_id(db_session, duel.target_id)
                 if challenged is None:
+                    continue
+
+                source = User.find_by_id(db_session, duel.source_id)
+                if source is None:
                     continue
 
                 self.bot.whisper(
@@ -435,7 +484,7 @@ class DuelModule(BaseModule):
             return
 
         # We can't use bot.execute_every directly since we can't later cancel jobs created through bot.execute_every
-        self.gc_job = ScheduleManager.execute_every(30, lambda: bot.execute_now(self._cancel_expired_duels))
+        self.gc_job = ScheduleManager.execute_every(30, self._cancel_expired_duels)
 
     def disable(self, bot: Optional[Bot]) -> None:
         if not bot:

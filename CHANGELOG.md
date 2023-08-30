@@ -4,7 +4,23 @@
 
 Remember to bring your dependencies up to date with `./scripts/venvinstall.sh` when updating to this version!
 
+- Dev: Add typing to the Sub Alert module. (#2512)
+- Dev: Add typing to the Raid Alert module. (#2513)
+- Dev: Add typing to the remaining chat alert modules. (#2514)
+- Dev: Add more typing to the CLR Overlay modules. (#2530)
+- Dev: Add typing to the Schedule manager. (#2531)
+- Dev: Add more typing to the Command Manager. (#2532)
+
+## v1.67
+
+Remember to bring your dependencies up to date with `./scripts/venvinstall.sh` when updating to this version!
+
+- Minor: Add minimum duel amount setting to the duel module. (#2508)
 - Bugfix: Fix playsounds tab in the top navigation bar not being visible on the admin page when the module was disabled. (#2469)
+- Bugfix: Multi-Raffle no longer raises an exception without picking any winners when the raffle ends. (#2492)
+- Dev: Fix deprecated use of `redis.hmset`. (#2501)
+- Dev: Fix deprecated use of `load_module` slated for removal in Python 3.12. (#2499)
+- Dev: Add typing to the raffle module. (#2500)
 
 ## v1.66
 
