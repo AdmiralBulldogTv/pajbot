@@ -16,18 +16,23 @@ def parse_points_amount(user: User, point_string: str) -> int:
     if parse_points_amount == "":
         return 0
 
+    negate = 1
+    if point_string[0] == "-":
+        negate = -1
+        point_string = point_string[1:]
+
     if point_string.startswith("0b"):
         try:
             bet = int(point_string, 2)
 
-            return bet
+            return bet * negate
         except (ValueError, TypeError):
             raise InvalidPointAmount("Invalid binary format (example: 0b101)")
     elif point_string.startswith("0x"):
         try:
             bet = int(point_string, 16)
 
-            return bet
+            return bet * negate
         except (ValueError, TypeError):
             raise InvalidPointAmount("Invalid hex format (example: 0xFF)")
     elif point_string.endswith("%"):
@@ -36,7 +41,7 @@ def parse_points_amount(user: User, point_string: str) -> int:
             if percentage <= 0 or percentage > 100:
                 raise InvalidPointAmount("Invalid percentage format (example: 43.5%) :o")
 
-            return math.floor(float(user.points) * (percentage / 100))
+            return math.floor(float(user.points) * (percentage / 100)) * negate
         except (ValueError, TypeError):
             raise InvalidPointAmount("Invalid percentage format (example: 43.5%)")
     elif point_string[0].isnumeric():
@@ -53,10 +58,10 @@ def parse_points_amount(user: User, point_string: str) -> int:
             if num_m:
                 bet_f *= 1000000**num_m
 
-            return round(bet_f)
+            return round(bet_f) * negate
         except (ValueError, TypeError):
             raise InvalidPointAmount("Non-recognizable point amount (examples: 100, 10k, 1m, 0.5k)")
     elif point_string.lower() in ALLIN_PHRASES:
-        return user.points
+        return user.points * negate
 
     raise InvalidPointAmount("Invalid point amount (examples: 100, 10k, 1m, 0.5k)")

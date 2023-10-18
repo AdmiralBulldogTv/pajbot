@@ -235,6 +235,10 @@ class RouletteModule(BaseModule):
             bot.whisper(source, str(e))
             return False
 
+        if bet <= 0:
+            bot.whisper(source, "You can't bet 0 or less points!")
+            return False
+
         if not source.can_afford(bet):
             bot.whisper(source, f"You don't have enough points to do a roulette for {bet} points :(")
             return False
