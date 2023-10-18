@@ -52,6 +52,7 @@ from pajbot.modules.linefarming import LineFarmingModule
 from pajbot.modules.linkchecker import LinkCheckerModule
 from pajbot.modules.linktracker import LinkTrackerModule
 from pajbot.modules.massping import MassPingProtectionModule
+from pajbot.modules.masspoints import MassPointsModule
 from pajbot.modules.math import MathModule
 from pajbot.modules.maxmsglength import MaxMsgLengthModule
 from pajbot.modules.moderators_refresh import ModeratorsRefreshModule
@@ -120,6 +121,7 @@ available_modules = [
     LinkTrackerModule,
     LiveAlertModule,
     MassPingProtectionModule,
+    MassPointsModule,
     MathModule,
     MaxMsgLengthModule,
     ModeratorsRefreshModule,
