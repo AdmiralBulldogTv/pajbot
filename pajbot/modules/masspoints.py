@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import logging
+from datetime import datetime, timedelta, timezone
 
 from pajbot import utils
 from pajbot.exc import InvalidPointAmount
@@ -10,8 +11,6 @@ from pajbot.managers.db import DBManager
 from pajbot.models.command import Command, CommandExample
 from pajbot.models.user import User
 from pajbot.modules import BaseModule, ModuleSetting
-
-from datetime import datetime, timedelta, timezone
 
 if TYPE_CHECKING:
     from pajbot.bot import Bot
@@ -67,9 +66,11 @@ class MassPointsModule(BaseModule):
 
             threshold = datetime.now(timezone.utc) - timedelta(minutes=self.settings["last_active_minutes"])
 
-            num_users = db_session.query(User) \
-                .filter(User.last_active >= threshold) \
+            num_users = (
+                db_session.query(User)
+                .filter(User.last_active >= threshold)
                 .update({User.points: User.points + num_points})
+            )
 
             bot.say(f"Successfully gave away {num_points} points to {num_users} users FeelsGoodMan")
 
