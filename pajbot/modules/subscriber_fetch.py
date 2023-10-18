@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 import logging
 
@@ -22,7 +22,7 @@ class SubscriberFetchModule(BaseModule):
     ENABLED_DEFAULT = True
     CATEGORY = "Internal"
     HIDDEN = True
-    SETTINGS: List[Any] = []
+    SETTINGS: list[Any] = []
 
     def update_subs_cmd(self, bot, source, **rest):
         # TODO if you wanted to improve this: Provide the user with feedback
@@ -47,6 +47,9 @@ class SubscriberFetchModule(BaseModule):
             )
             return
         except HTTPError as e:
+            if not e.response:
+                raise e
+
             if e.response.status_code == 401:
                 log.error(
                     "Cannot fetch subscribers because the streamer token does not grant access to the "

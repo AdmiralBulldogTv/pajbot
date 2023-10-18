@@ -18,6 +18,19 @@ from marshmallow import Schema, ValidationError
 log = logging.getLogger(__name__)
 
 
+def filter_message(message: str) -> str:
+    """
+    Filter out invalid Twitch characters from this message
+    """
+
+    filtered_chars = {
+        "\n",
+        "\r",
+    }
+
+    return "".join(filter(lambda c: c not in filtered_chars, [c for c in message]))
+
+
 @dataclass
 class TestBanphrase(Schema):
     message: str
@@ -71,7 +84,8 @@ def init(bp: Blueprint) -> None:
     def banphrases_test():
         if request.is_json:
             # Example request:
-            # curl -XPOST -d'{"message": "xD"}' -H'Content-Type: application/json' http://localhost:7070/api/v1/banphrases/test
+            # curl --json '{"message": "xD"}'  http://localhost:7070/api/v1/banphrases/test
+
             json_data = request.get_json()
             if not json_data:
                 return {"error": "Missing json body"}, 400
@@ -82,14 +96,14 @@ def init(bp: Blueprint) -> None:
         else:
             # This endpoint must handle form requests
             # Example requests:
-            # curl -XPOST -H 'Content-Type: application/x-www-form-urlencoded' -d 'message=xD2' http://localhost:7070/api/v1/banphrases/test
-            # curl -XPOST -F 'message=xD2' http://localhost:7070/api/v1/banphrases/test
+            # curl -d 'message=xD2' http://localhost:7070/api/v1/banphrases/test
+            # curl -F 'message=xD3' http://localhost:7070/api/v1/banphrases/test
             try:
                 data: TestBanphrase = TestBanphraseSchema().load(request.form.to_dict())
             except ValidationError as err:
                 return {"error": f"Did not match schema: {json.dumps(err.messages)}"}, 400
 
-        message = data.message
+        message = filter_message(data.message)
 
         if not message:
             return {"error": "Parameter `message` cannot be empty."}, 400
