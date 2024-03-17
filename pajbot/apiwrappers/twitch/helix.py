@@ -244,7 +244,7 @@ class TwitchHelixAPI(BaseTwitchAPI):
         try:
             return super().request(method, endpoint, params, headers, authorization, json)
         except HTTPError as e:
-            if not e.response:
+            if e.response is None:
                 raise e
 
             if e.response.status_code == 429:
@@ -521,18 +521,22 @@ class TwitchHelixAPI(BaseTwitchAPI):
     def bulk_get_user_basics_by_id(self, user_ids: list[str]) -> list[Optional[UserBasics]]:
         bulk_user_data = self.bulk_get_user_data_by_id(user_ids)
         return [
-            UserBasics(user_data["id"], user_data["login"], user_data["display_name"])
-            if user_data is not None
-            else None
+            (
+                UserBasics(user_data["id"], user_data["login"], user_data["display_name"])
+                if user_data is not None
+                else None
+            )
             for user_data in bulk_user_data
         ]
 
     def bulk_get_user_basics_by_login(self, logins: list[str]) -> list[Optional[UserBasics]]:
         bulk_user_data = self.bulk_get_user_data_by_login(logins)
         return [
-            UserBasics(user_data["id"], user_data["login"], user_data["display_name"])
-            if user_data is not None
-            else None
+            (
+                UserBasics(user_data["id"], user_data["login"], user_data["display_name"])
+                if user_data is not None
+                else None
+            )
             for user_data in bulk_user_data
         ]
 
